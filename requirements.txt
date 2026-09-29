@@ -1,0 +1,35 @@
+# Packages TensorFlowTTS needs on top of an environment providing TensorFlow 2.9.3 and NumPy 1.23.5,
+# for its model tests (test/). setup.py pins tensorflow-gpu 2.7.0, which is not the corpus's
+# TensorFlow, so the package is not installed; the tests import it from the source tree.
+#
+# SciPy is held at 1.12: tensorflow_tts/models/mb_melgan.py imports `kaiser` from scipy.signal,
+# which SciPy 1.13 removed (it lives in scipy.signal.windows).
+# TensorFlow Addons 0.17 is the line for TensorFlow 2.9 and needs typeguard 2.x; inflect 5.x is the
+# last line that does not require typeguard 4.
+# pyopenjtalk has no wheels and needs CMake and the Python headers to build, so its prebuilt
+# distribution provides the same `pyopenjtalk` module. pyworld is left out: it has no wheel for
+# this Python, needs the headers to build, and nothing the tests import uses it.
+# g2p_en fetches NLTK's cmudict and averaged_perceptron_tagger into ~/nltk_data on first import.
+tensorflow-addons==0.17.1
+typeguard==2.13.3
+scipy==1.12.0
+huggingface-hub==0.0.8
+librosa==0.10.2.post1
+numba==0.58.1
+llvmlite==0.41.1
+soundfile==0.12.1
+matplotlib==3.10.9
+PyYAML==6.0.1
+tqdm==4.66.5
+Unidecode==1.3.8
+inflect==5.6.2
+scikit-learn==1.5.1
+jamo==0.4.1
+pypinyin==0.55.0
+g2pM==0.1.2.5
+TextGrid==1.6.1
+click==8.5.0
+g2p-en==2.1.0
+nltk==3.10.3
+pyopenjtalk-prebuilt==0.3.0
+pytest==8.3.5

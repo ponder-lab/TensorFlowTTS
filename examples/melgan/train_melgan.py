@@ -239,6 +239,7 @@ class MelganTrainer(GanBasedTrainer):
             )
 
 
+@tf.function
 def collater(
     items,
     batch_max_steps=tf.constant(8192, dtype=tf.int32),

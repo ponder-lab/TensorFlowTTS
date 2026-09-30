@@ -177,6 +177,7 @@ class CharactorMelDataset(AbstractDataset):
 
         return items
 
+    @tf.function
     def _guided_attention(self, items):
         """Guided attention. Refer to page 3 on the paper (https://arxiv.org/abs/1710.08969)."""
         items = items.copy()

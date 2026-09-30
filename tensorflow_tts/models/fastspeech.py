@@ -71,6 +71,7 @@ class TFEmbedding(tf.keras.layers.Embedding):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @tf.function
     def call(self, inputs):
         inputs = tf.cast(inputs, tf.int32)
         outputs = tf.gather(self.embeddings, inputs)
@@ -121,6 +122,7 @@ class TFFastSpeechEmbeddings(tf.keras.layers.Layer):
             )
         super().build(input_shape)
 
+    @tf.function
     def call(self, inputs, training=False):
         """Get charactor embeddings of inputs.
 
@@ -133,6 +135,7 @@ class TFFastSpeechEmbeddings(tf.keras.layers.Layer):
         """
         return self._embedding(inputs, training=training)
 
+    @tf.function
     def _embedding(self, inputs, training=False):
         """Applies embedding based on inputs tensor."""
         input_ids, speaker_ids = inputs
@@ -222,6 +225,7 @@ class TFFastSpeechSelfAttention(tf.keras.layers.Layer):
         self.dropout = tf.keras.layers.Dropout(config.attention_probs_dropout_prob)
         self.config = config
 
+    @tf.function
     def transpose_for_scores(self, x, batch_size):
         """Transpose to calculate attention scores."""
         x = tf.reshape(
@@ -230,6 +234,7 @@ class TFFastSpeechSelfAttention(tf.keras.layers.Layer):
         )
         return tf.transpose(x, perm=[0, 2, 1, 3])
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         hidden_states, attention_mask = inputs
@@ -290,6 +295,7 @@ class TFFastSpeechSelfOutput(tf.keras.layers.Layer):
         )
         self.dropout = tf.keras.layers.Dropout(config.hidden_dropout_prob)
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         hidden_states, input_tensor = inputs
@@ -309,6 +315,7 @@ class TFFastSpeechAttention(tf.keras.layers.Layer):
         self.self_attention = TFFastSpeechSelfAttention(config, name="self")
         self.dense_output = TFFastSpeechSelfOutput(config, name="output")
 
+    @tf.function
     def call(self, inputs, training=False):
         input_tensor, attention_mask = inputs
 
@@ -352,6 +359,7 @@ class TFFastSpeechIntermediate(tf.keras.layers.Layer):
         else:
             self.intermediate_act_fn = config.hidden_act
 
+    @tf.function
     def call(self, inputs):
         """Call logic."""
         hidden_states, attention_mask = inputs
@@ -377,6 +385,7 @@ class TFFastSpeechOutput(tf.keras.layers.Layer):
         )
         self.dropout = tf.keras.layers.Dropout(config.hidden_dropout_prob)
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         hidden_states, input_tensor = inputs
@@ -396,6 +405,7 @@ class TFFastSpeechLayer(tf.keras.layers.Layer):
         self.intermediate = TFFastSpeechIntermediate(config, name="intermediate")
         self.bert_output = TFFastSpeechOutput(config, name="output")
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         hidden_states, attention_mask = inputs
@@ -432,6 +442,7 @@ class TFFastSpeechEncoder(tf.keras.layers.Layer):
             for i in range(config.num_hidden_layers)
         ]
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         hidden_states, attention_mask = inputs
@@ -496,6 +507,7 @@ class TFFastSpeechDecoder(TFFastSpeechEncoder):
                 units=config.hidden_size, name="speaker_fc"
             )
 
+    @tf.function
     def call(self, inputs, training=False):
         hidden_states, speaker_ids, encoder_mask, decoder_pos = inputs
 
@@ -561,6 +573,7 @@ class TFTacotronPostnet(tf.keras.layers.Layer):
         )
         self.activation = [tf.nn.tanh] * (config.n_conv_postnet - 1) + [tf.identity]
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         outputs, mask = inputs
@@ -601,6 +614,7 @@ class TFFastSpeechDurationPredictor(tf.keras.layers.Layer):
         self.conv_layers_sequence = tf.keras.Sequential(self.conv_layers)
         self.output_layer = tf.keras.layers.Dense(1)
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         encoder_hidden_states, attention_mask = inputs
@@ -627,6 +641,7 @@ class TFFastSpeechLengthRegulator(tf.keras.layers.Layer):
         super().__init__(**kwargs)
         self.config = config
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic.
         Args:
@@ -639,6 +654,7 @@ class TFFastSpeechLengthRegulator(tf.keras.layers.Layer):
         )
         return outputs, encoder_masks
 
+    @tf.function
     def _length_regulator(self, encoder_hidden_states, durations_gt):
         """Length regulator logic."""
         sum_durations = tf.reduce_sum(durations_gt, axis=-1)  # [batch_size]
@@ -794,6 +810,7 @@ class TFFastSpeech(BaseModel):
         self.embeddings.resize_positional_embeddings(new_size)
         self._build()
 
+    @tf.function
     def call(
         self, input_ids, speaker_ids, duration_gts, training=False, **kwargs,
     ):

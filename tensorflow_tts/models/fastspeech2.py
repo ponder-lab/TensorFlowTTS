@@ -61,6 +61,7 @@ class TFFastSpeechVariantPredictor(tf.keras.layers.Layer):
 
         self.config = config
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         encoder_hidden_states, speaker_ids, attention_mask = inputs
@@ -139,6 +140,7 @@ class TFFastSpeech2(TFFastSpeech):
             energy_gts=energy_gts,
         )
 
+    @tf.function
     def call(
         self,
         input_ids,

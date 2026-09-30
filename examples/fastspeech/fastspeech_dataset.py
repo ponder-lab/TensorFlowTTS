@@ -98,7 +98,7 @@ class CharactorDurationMelDataset(AbstractDataset):
 
             yield items
 
-    @tf.function
+    @tf.function(input_signature=[tf.TensorSpec(shape=None, dtype=tf.string)])
     def _load_data(self, items):
         mel = tf.numpy_function(np.load, [items["mel_files"]], tf.float32)
         charactor = tf.numpy_function(np.load, [items["charactor_files"]], tf.int32)

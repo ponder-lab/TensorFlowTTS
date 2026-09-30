@@ -45,6 +45,7 @@ class TFReflectionPad1d(tf.keras.layers.Layer):
         self.padding_size = padding_size
         self.padding_type = padding_type
 
+    @tf.function(input_signature=[tf.TensorSpec(shape=None, dtype=tf.float32)])
     def call(self, x):
         """Calculate forward propagation.
         Args:
@@ -90,6 +91,7 @@ class TFConvTranspose1d(tf.keras.layers.Layer):
         if is_weight_norm:
             self.conv1d_transpose = WeightNormalization(self.conv1d_transpose)
 
+    @tf.function(input_signature=[tf.TensorSpec(shape=(4, 8000, 256), dtype=tf.float32)])
     def call(self, x):
         """Calculate forward propagation.
         Args:
@@ -163,6 +165,7 @@ class TFResidualStack(tf.keras.layers.Layer):
             self._apply_weightnorm(self.blocks)
             self.shortcut = WeightNormalization(self.shortcut)
 
+    @tf.function(input_signature=[tf.TensorSpec(shape=(4, 8000, 256), dtype=tf.float32)])
     def call(self, x):
         """Calculate forward propagation.
         Args:
@@ -275,6 +278,7 @@ class TFMelGANGenerator(BaseModel):
 
         self.melgan = tf.keras.models.Sequential(layers)
 
+    @tf.function
     def call(self, mels, **kwargs):
         """Calculate forward propagation.
         Args:

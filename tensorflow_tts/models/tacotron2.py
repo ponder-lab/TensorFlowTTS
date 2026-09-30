@@ -78,6 +78,7 @@ class TFEmbedding(tf.keras.layers.Embedding):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @tf.function
     def call(self, inputs):
         inputs = tf.cast(tf.expand_dims(inputs, -1), tf.int32)
         outputs = tf.gather_nd(self.embeddings, inputs)
@@ -106,6 +107,7 @@ class TFTacotronConvBatchNorm(tf.keras.layers.Layer):
         )
         self.act = ACT2FN[activation]
 
+    @tf.function
     def call(self, inputs, training=False):
         outputs = self.conv1d(inputs)
         outputs = self.norm(outputs, training=training)
@@ -151,6 +153,7 @@ class TFTacotronEmbeddings(tf.keras.layers.Layer):
             )
         super().build(input_shape)
 
+    @tf.function
     def call(self, inputs, training=False):
         """Get character embeddings of inputs.
         Args:
@@ -161,6 +164,7 @@ class TFTacotronEmbeddings(tf.keras.layers.Layer):
         """
         return self._embedding(inputs, training=training)
 
+    @tf.function
     def _embedding(self, inputs, training=False):
         """Applies embedding based on inputs tensor."""
         input_ids, speaker_ids = inputs
@@ -201,6 +205,7 @@ class TFTacotronEncoderConvs(tf.keras.layers.Layer):
             )
             self.conv_batch_norm.append(conv)
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         outputs = inputs
@@ -237,6 +242,7 @@ class TFTacotronEncoder(tf.keras.layers.Layer):
 
         self.config = config
 
+    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         input_ids, speaker_ids, input_mask = inputs
@@ -440,6 +446,7 @@ class TFTacotronLocationSensitiveAttention(BahdanauAttention):
         """Calculate location sensitive energy."""
         return tf.squeeze(self.v(tf.nn.tanh(W_keys + W_query + W_fil)), -1)
 
+    @tf.function(input_signature=[tf.TensorSpec(shape=(), dtype=tf.int32), tf.TensorSpec(shape=(), dtype=tf.int32)])
     def get_initial_state(self, batch_size, size):
         """Get initial alignments."""
         return tf.zeros(shape=[batch_size, size], dtype=tf.float32)
@@ -589,6 +596,7 @@ class TFTacotronDecoderCell(tf.keras.layers.AbstractRNNCell):
             max_alignments=tf.TensorShape([1]),
         )
 
+    @tf.function(input_signature=[tf.TensorSpec(shape=(), dtype=tf.int32)])
     def get_initial_state(self, batch_size):
         """Get initial states."""
         initial_attention_lstm_cell_states = self.attention_lstm.get_initial_state(

@@ -118,7 +118,7 @@ class TFPQMF(tf.keras.layers.Layer):
 
     @tf.function(
         experimental_relax_shapes=True,
-        input_signature=[tf.TensorSpec(shape=[None, None, 1], dtype=tf.float32)],
+        input_signature=[tf.TensorSpec(shape=(1, 25600, 1), dtype=tf.float32)],
     )
     def analysis(self, x):
         """Analysis with PQMF.

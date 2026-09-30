@@ -87,7 +87,7 @@ class AudioMelDataset(AbstractDataset):
 
             yield items
 
-    @tf.function
+    @tf.function(input_signature=[tf.TensorSpec(shape=None, dtype=tf.string)])
     def _load_data(self, items):
         audio = tf.numpy_function(np.load, [items["audio_files"]], tf.float32)
         mel = tf.numpy_function(np.load, [items["mel_files"]], tf.float32)

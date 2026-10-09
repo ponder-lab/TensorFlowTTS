@@ -17,6 +17,7 @@
 import abc
 import logging
 import os
+import timeit
 
 import tensorflow as tf
 from tqdm import tqdm
@@ -33,6 +34,7 @@ class BasedTrainer(metaclass=abc.ABCMeta):
         self.epochs = epochs
         self.config = config
         self.finish_train = False
+        self.skipped_time = 0
         self.writer = tf.summary.create_file_writer(config["outdir"])
         self.train_data_loader = None
         self.eval_data_loader = None
@@ -910,7 +912,9 @@ class Seq2SeqBasedTrainer(BasedTrainer, metaclass=abc.ABCMeta):
             )
 
         # record
+        io_time = timeit.default_timer()
         self._write_to_tensorboard(self.eval_metrics, stage="eval")
+        self.skipped_time += timeit.default_timer() - io_time
 
         # reset
         self.reset_states_eval()

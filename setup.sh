@@ -24,6 +24,9 @@
 #                          switched off: no checkpoint and no TensorBoard training log (both
 #                          intervals past any run's length). Evaluation and its intermediate
 #                          results are left as they are, since evaluation also predicts.
+#   ./dump_ljspeech/tacotron2-config.yml in this checkout: a link to it, so the training command can
+#                          name it by a relative path (a runner passes `~` through unexpanded, and
+#                          the script opens --config as given).
 # Idempotent: an extracted archive and a completed dump are kept and not redone. The dump is not
 # byte-reproducible (preprocess fits its scalers in the order a process pool returns results), which
 # is one more reason it is generated once and kept.
@@ -80,3 +83,8 @@ if ! grep -q '^save_interval_steps: 1000000000 ' "$config.partial" ||
 	exit 1
 fi
 mv "$config.partial" "$config"
+if [[ -e dump_ljspeech/tacotron2-config.yml && ! -L dump_ljspeech/tacotron2-config.yml ]]; then
+	echo "setup.sh: ./dump_ljspeech/tacotron2-config.yml is not a link to $config. Move it aside, then re-run." >&2
+	exit 1
+fi
+ln -sfn "$config" dump_ljspeech/tacotron2-config.yml

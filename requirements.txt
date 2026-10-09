@@ -7,8 +7,9 @@
 # TensorFlow Addons 0.17 is the line for TensorFlow 2.9 and needs typeguard 2.x; inflect 5.x is the
 # last line that does not require typeguard 4.
 # pyopenjtalk has no wheels and needs CMake and the Python headers to build, so its prebuilt
-# distribution provides the same `pyopenjtalk` module. pyworld is left out: it has no wheel for
-# this Python, needs the headers to build, and nothing the tests import uses it.
+# distribution provides the same `pyopenjtalk` module. pyworld has no wheel for this Python and
+# builds from source (it needs the Python headers); the dataset preprocessing that setup.sh runs
+# (tensorflow_tts.bin.preprocess) imports it.
 # g2p_en fetches NLTK's cmudict and averaged_perceptron_tagger into ~/nltk_data on first import.
 tensorflow-addons==0.17.1
 typeguard==2.13.3
@@ -33,3 +34,4 @@ g2p-en==2.1.0
 nltk==3.10.3
 pyopenjtalk-prebuilt==0.3.0
 pytest==8.3.5
+pyworld==0.3.4

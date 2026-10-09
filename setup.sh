@@ -37,7 +37,7 @@ if [[ ! -e $LJSPEECH_DIR/.extracted ]]; then
 fi
 
 if [[ ! -e $dump/.complete ]]; then
-	# preprocess imports pyworld, which setup.py requires and requirements.txt leaves out.
+	# preprocess imports pyworld (requirements.txt); fail clearly if it is not installed.
 	"$PYTHON" -c 'import pyworld' 2>/dev/null || {
 		echo "setup.sh: preprocessing needs pyworld, which this interpreter cannot import ($PYTHON)." >&2
 		exit 1; }

@@ -20,6 +20,7 @@ for i in range(len(physical_devices)):
     tf.config.experimental.set_memory_growth(physical_devices[i], True)
 
 import sys
+import timeit
 
 sys.path.append(".")
 
@@ -38,6 +39,9 @@ from tensorflow_tts.models import TFTacotron2
 from tensorflow_tts.optimizers import AdamWeightDecay, WarmUp
 from tensorflow_tts.trainers import Seq2SeqBasedTrainer
 from tensorflow_tts.utils import calculate_2d_loss, calculate_3d_loss, return_strategy
+from scripts.utils import write_csv
+
+skipped_time = 0
 
 
 class Tacotron2Trainer(Seq2SeqBasedTrainer):
@@ -240,6 +244,9 @@ class Tacotron2Trainer(Seq2SeqBasedTrainer):
             alignment_historys = alignment_historys.numpy()
             utt_ids = utt_ids.numpy()
 
+        global skipped_time
+        io_time = timeit.default_timer()
+
         # check directory
         dirname = os.path.join(self.config["outdir"], f"predictions/{self.steps}steps")
         if not os.path.exists(dirname):
@@ -287,6 +294,8 @@ class Tacotron2Trainer(Seq2SeqBasedTrainer):
             plt.tight_layout()
             plt.savefig(figname)
             plt.close()
+
+        skipped_time += timeit.default_timer() - io_time
 
 
 def main():
@@ -468,12 +477,18 @@ def main():
         is_mixed_precision=args.mixed_precision,
     )
 
+    global skipped_time
+    start_time = timeit.default_timer()
+    skipped_time = 0
+
     with STRATEGY.scope():
         # define model.
         tacotron_config = Tacotron2Config(**config["tacotron2_params"])
         tacotron2 = TFTacotron2(config=tacotron_config, name="tacotron2")
         tacotron2._build()
+        io_time = timeit.default_timer()
         tacotron2.summary()
+        skipped_time += timeit.default_timer() - io_time
 
         if len(args.pretrained) > 1:
             tacotron2.load_weights(args.pretrained, by_name=True, skip_mismatch=True)
@@ -522,6 +537,9 @@ def main():
     except KeyboardInterrupt:
         trainer.save_checkpoint()
         logging.info(f"Successfully saved checkpoint @ {trainer.steps}steps.")
+
+    time = timeit.default_timer() - start_time - skipped_time
+    write_csv(__file__, epochs=trainer.steps, time=time)
 
 
 if __name__ == "__main__":

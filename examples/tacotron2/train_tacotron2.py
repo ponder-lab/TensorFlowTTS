@@ -41,8 +41,6 @@ from tensorflow_tts.trainers import Seq2SeqBasedTrainer
 from tensorflow_tts.utils import calculate_2d_loss, calculate_3d_loss, return_strategy
 from scripts.utils import write_csv
 
-skipped_time = 0
-
 
 class Tacotron2Trainer(Seq2SeqBasedTrainer):
     """Tacotron2 Trainer class based on Seq2SeqBasedTrainer."""
@@ -244,7 +242,6 @@ class Tacotron2Trainer(Seq2SeqBasedTrainer):
             alignment_historys = alignment_historys.numpy()
             utt_ids = utt_ids.numpy()
 
-        global skipped_time
         io_time = timeit.default_timer()
 
         # check directory
@@ -295,7 +292,7 @@ class Tacotron2Trainer(Seq2SeqBasedTrainer):
             plt.savefig(figname)
             plt.close()
 
-        skipped_time += timeit.default_timer() - io_time
+        self.skipped_time += timeit.default_timer() - io_time
 
 
 def main():
@@ -477,7 +474,6 @@ def main():
         is_mixed_precision=args.mixed_precision,
     )
 
-    global skipped_time
     start_time = timeit.default_timer()
     skipped_time = 0
 
@@ -538,7 +534,7 @@ def main():
         trainer.save_checkpoint()
         logging.info(f"Successfully saved checkpoint @ {trainer.steps}steps.")
 
-    time = timeit.default_timer() - start_time - skipped_time
+    time = timeit.default_timer() - start_time - skipped_time - trainer.skipped_time
     write_csv(__file__, epochs=trainer.steps, time=time)
 
 

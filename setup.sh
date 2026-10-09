@@ -20,6 +20,10 @@
 #                          path the README's training command reads. ./dump_ljspeech/ is a real
 #                          directory, so this project's .gitignore entry `dump_ljspeech/` covers it
 #                          (a link in its place would not be ignored).
+#   tacotron2-config.yml   examples/tacotron2/conf/tacotron2.v1.yaml with its training-time writes
+#                          switched off: no checkpoint and no TensorBoard training log (both
+#                          intervals past any run's length). Evaluation and its intermediate
+#                          results are left as they are, since evaluation also predicts.
 # Idempotent: an extracted archive and a completed dump are kept and not redone. The dump is not
 # byte-reproducible (preprocess fits its scalers in the order a process pool returns results), which
 # is one more reason it is generated once and kept.
@@ -63,3 +67,16 @@ for split in train valid; do
 	fi
 	ln -sfn "$dump/$split" "dump_ljspeech/$split"
 done
+
+# Regenerated every time from the checked-out config, so it never goes stale against it. A textual
+# substitution, not a YAML round trip, so the rest of the file stays byte for byte.
+config="$LJSPEECH_DIR/tacotron2-config.yml"
+sed -e "s|^save_interval_steps: 2000 |save_interval_steps: 1000000000 |" \
+	-e "s|^log_interval_steps: 200 |log_interval_steps: 1000000000 |" \
+	examples/tacotron2/conf/tacotron2.v1.yaml > "$config.partial"
+if ! grep -q '^save_interval_steps: 1000000000 ' "$config.partial" ||
+	! grep -q '^log_interval_steps: 1000000000 ' "$config.partial"; then
+	echo "setup.sh: examples/tacotron2/conf/tacotron2.v1.yaml has a training-time write this script does not switch off." >&2
+	exit 1
+fi
+mv "$config.partial" "$config"

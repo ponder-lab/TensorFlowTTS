@@ -107,7 +107,6 @@ class TFTacotronConvBatchNorm(tf.keras.layers.Layer):
         )
         self.act = ACT2FN[activation]
 
-    @tf.function
     def call(self, inputs, training=False):
         outputs = self.conv1d(inputs)
         outputs = self.norm(outputs, training=training)
@@ -205,7 +204,6 @@ class TFTacotronEncoderConvs(tf.keras.layers.Layer):
             )
             self.conv_batch_norm.append(conv)
 
-    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         outputs = inputs
@@ -242,7 +240,6 @@ class TFTacotronEncoder(tf.keras.layers.Layer):
 
         self.config = config
 
-    @tf.function
     def call(self, inputs, training=False):
         """Call logic."""
         input_ids, speaker_ids, input_mask = inputs

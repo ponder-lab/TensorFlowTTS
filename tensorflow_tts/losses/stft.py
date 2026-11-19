@@ -24,6 +24,7 @@ class TFSpectralConvergence(tf.keras.layers.Layer):
         """Initialize."""
         super().__init__()
 
+    @tf.function
     def call(self, y_mag, x_mag):
         """Calculate forward propagation.
         Args:
@@ -44,6 +45,7 @@ class TFLogSTFTMagnitude(tf.keras.layers.Layer):
         """Initialize."""
         super().__init__()
 
+    @tf.function
     def call(self, y_mag, x_mag):
         """Calculate forward propagation.
         Args:
@@ -67,6 +69,7 @@ class TFSTFT(tf.keras.layers.Layer):
         self.spectral_convergenge_loss = TFSpectralConvergence()
         self.log_stft_magnitude_loss = TFLogSTFTMagnitude()
 
+    @tf.function
     def call(self, y, x):
         """Calculate forward propagation.
         Args:

@@ -83,6 +83,7 @@ class FastSpeech2Trainer(Seq2SeqBasedTrainer):
             reduction=tf.keras.losses.Reduction.NONE
         )
 
+    @tf.function
     def compute_per_example_losses(self, batch, outputs):
         """Compute per example losses and return dict_metrics_losses
         Note that all element of the loss MUST has a shape [batch_size] and 

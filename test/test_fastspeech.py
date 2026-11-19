@@ -59,7 +59,6 @@ def test_fastspeech_trainable(num_hidden_layers, n_speakers):
 
     mel_gts = tf.random.uniform(shape=[1, 10, 80], dtype=tf.float32)
 
-    @tf.function
     def one_step_training():
         with tf.GradientTape() as tape:
             mel_outputs_before, _, duration_outputs = fastspeech(

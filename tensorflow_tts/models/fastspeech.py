@@ -71,6 +71,7 @@ class TFEmbedding(tf.keras.layers.Embedding):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @tf.function
     def call(self, inputs):
         inputs = tf.cast(inputs, tf.int32)
         outputs = tf.gather(self.embeddings, inputs)

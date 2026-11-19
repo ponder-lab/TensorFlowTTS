@@ -189,6 +189,7 @@ class TFStretch1d(tf.keras.layers.Layer):
         self.y_scale = y_scale
         self.method = method
 
+    @tf.function
     def call(self, x):
         """Calculate forward propagation.
 
@@ -427,6 +428,7 @@ class TFParallelWaveGANGenerator(BaseModel):
         mels = tf.random.uniform(shape=[2, 20, 80], dtype=tf.float32)
         self(mels, training=tf.cast(True, tf.bool))
 
+    @tf.function
     def call(self, mels, training=False, **kwargs):
         """Calculate forward propagation.
 
@@ -542,6 +544,7 @@ class TFParallelWaveGANDiscriminator(BaseModel):
         x = tf.random.uniform(shape=[2, 16000, 1])
         self(x)
 
+    @tf.function
     def call(self, x):
         """Calculate forward propagation.
 

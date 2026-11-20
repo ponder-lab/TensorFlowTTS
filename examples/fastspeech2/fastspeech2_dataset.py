@@ -130,6 +130,7 @@ class CharactorDurationF0EnergyMelDataset(AbstractDataset):
         x[zero_idxs] = 0.0
         return x
 
+    @tf.function
     def _norm_mean_std_tf(self, x, mean, std):
         x = tf.numpy_function(self._norm_mean_std, [x, mean, std], tf.float32)
         return x
@@ -153,7 +154,7 @@ class CharactorDurationF0EnergyMelDataset(AbstractDataset):
 
             yield items
 
-    @tf.function(input_signature=[tf.TensorSpec(shape=None, dtype=tf.string)])
+    @tf.function
     def _load_data(self, items):
         mel = tf.numpy_function(np.load, [items["mel_files"]], tf.float32)
         charactor = tf.numpy_function(np.load, [items["charactor_files"]], tf.int32)

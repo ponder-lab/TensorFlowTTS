@@ -221,7 +221,6 @@ class TFHifiGANGenerator(BaseModel):
 
         self.hifigan = tf.keras.models.Sequential(layers)
 
-    @tf.function
     def call(self, mels, **kwargs):
         """Calculate forward propagation.
         Args:
@@ -307,7 +306,6 @@ class TFHifiGANPeriodDiscriminator(tf.keras.layers.Layer):
             self._apply_weightnorm(self.convs)
             self.conv_post = WeightNormalization(self.conv_post)
 
-    @tf.function
     def call(self, x):
         """Calculate forward propagation.
         Args:
@@ -368,7 +366,6 @@ class TFHifiGANMultiPeriodDiscriminator(BaseModel):
                 )
             ]
 
-    @tf.function
     def call(self, x):
         """Calculate forward propagation.
         Args:

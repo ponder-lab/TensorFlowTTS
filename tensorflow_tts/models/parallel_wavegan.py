@@ -135,7 +135,6 @@ class TFResidualBlock(tf.keras.layers.Layer):
 
         self.dropout = tf.keras.layers.Dropout(rate=self.dropout_rate)
 
-    @tf.function
     def call(self, x, c, training=False):
         """Calculate forward propagation.
 
@@ -190,7 +189,7 @@ class TFStretch1d(tf.keras.layers.Layer):
         self.y_scale = y_scale
         self.method = method
 
-    @tf.function
+    @tf.function(input_signature=[tf.TensorSpec(shape=(None, None, None, 1), dtype=tf.float32)])
     def call(self, x):
         """Calculate forward propagation.
 
@@ -332,7 +331,6 @@ class TFConvInUpsampleNetWork(tf.keras.layers.Layer):
             name="upsample_network",
         )
 
-    @tf.function(input_signature=[tf.TensorSpec(shape=(None, None, 80), dtype=tf.float32)])
     def call(self, c):
         """Calculate forward propagation.
 

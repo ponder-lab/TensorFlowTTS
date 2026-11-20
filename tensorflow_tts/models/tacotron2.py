@@ -152,7 +152,6 @@ class TFTacotronEmbeddings(tf.keras.layers.Layer):
             )
         super().build(input_shape)
 
-    @tf.function
     def call(self, inputs, training=False):
         """Get character embeddings of inputs.
         Args:
@@ -163,7 +162,6 @@ class TFTacotronEmbeddings(tf.keras.layers.Layer):
         """
         return self._embedding(inputs, training=training)
 
-    @tf.function
     def _embedding(self, inputs, training=False):
         """Applies embedding based on inputs tensor."""
         input_ids, speaker_ids = inputs
@@ -443,7 +441,6 @@ class TFTacotronLocationSensitiveAttention(BahdanauAttention):
         """Calculate location sensitive energy."""
         return tf.squeeze(self.v(tf.nn.tanh(W_keys + W_query + W_fil)), -1)
 
-    @tf.function
     def get_initial_state(self, batch_size, size):
         """Get initial alignments."""
         return tf.zeros(shape=[batch_size, size], dtype=tf.float32)
@@ -593,7 +590,6 @@ class TFTacotronDecoderCell(tf.keras.layers.AbstractRNNCell):
             max_alignments=tf.TensorShape([1]),
         )
 
-    @tf.function
     def get_initial_state(self, batch_size):
         """Get initial states."""
         initial_attention_lstm_cell_states = self.attention_lstm.get_initial_state(

@@ -100,7 +100,6 @@ class WeightNormalization(tf.keras.layers.Wrapper):
         )
         self.g.assign(kernel_norm)
 
-    @tf.function
     def _data_dep_init(self, inputs):
         """Data dependent initialization."""
         # Normalize kernel first so that calling the layer calculates
@@ -166,7 +165,6 @@ class WeightNormalization(tf.keras.layers.Wrapper):
 
         super().build()
 
-    @tf.function
     def call(self, inputs):
         """Call `Layer`."""
         if not self.initialized:

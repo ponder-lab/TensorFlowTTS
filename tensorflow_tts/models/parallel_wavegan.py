@@ -135,7 +135,6 @@ class TFResidualBlock(tf.keras.layers.Layer):
 
         self.dropout = tf.keras.layers.Dropout(rate=self.dropout_rate)
 
-    @tf.function
     def call(self, x, c, training=False):
         """Calculate forward propagation.
 
@@ -332,7 +331,6 @@ class TFConvInUpsampleNetWork(tf.keras.layers.Layer):
             name="upsample_network",
         )
 
-    @tf.function
     def call(self, c):
         """Calculate forward propagation.
 

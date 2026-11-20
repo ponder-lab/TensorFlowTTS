@@ -189,7 +189,7 @@ class TFStretch1d(tf.keras.layers.Layer):
         self.y_scale = y_scale
         self.method = method
 
-    @tf.function(input_signature=[tf.TensorSpec(shape=(None, None, None, 1), dtype=tf.float32)])
+    @tf.function(reduce_retracing=True)
     def call(self, x):
         """Calculate forward propagation.
 

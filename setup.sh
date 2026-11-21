@@ -74,9 +74,16 @@ done
 # Regenerated every time from the checked-out config, so it never goes stale against it. A textual
 # substitution, not a YAML round trip, so the rest of the file stays byte for byte.
 config="$LJSPEECH_DIR/tacotron2-config.yml"
-sed -e "s|^save_interval_steps: 2000 |save_interval_steps: 1000000000 |" \
+sed -e "s|^train_max_steps: 200000 |train_max_steps: 300 |" \
+	-e "s|^eval_interval_steps: 500 |eval_interval_steps: 100 |" \
+	-e "s|^save_interval_steps: 2000 |save_interval_steps: 1000000000 |" \
 	-e "s|^log_interval_steps: 200 |log_interval_steps: 1000000000 |" \
 	examples/tacotron2/conf/tacotron2.v1.yaml > "$config.partial"
+if ! grep -q '^train_max_steps: 300 ' "$config.partial" ||
+	! grep -q '^eval_interval_steps: 100 ' "$config.partial"; then
+	echo "setup.sh: examples/tacotron2/conf/tacotron2.v1.yaml's train_max_steps or eval_interval_steps did not take the harness's bound." >&2
+	exit 1
+fi
 if ! grep -q '^save_interval_steps: 1000000000 ' "$config.partial" ||
 	! grep -q '^log_interval_steps: 1000000000 ' "$config.partial"; then
 	echo "setup.sh: examples/tacotron2/conf/tacotron2.v1.yaml has a training-time write this script does not switch off." >&2

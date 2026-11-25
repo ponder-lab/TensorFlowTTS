@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Prepares LJSpeech for examples/tacotron2/train_tacotron2.py with this project's own two-step
+# Prepares LJSpeech for examples/tacotron2/train_tacotron2.py and
+# examples/parallel_wavegan/train_parallel_wavegan.py with this project's own two-step
 # preprocessing, the README's "Preprocessing" section for `ljspeech`:
 #
 #   tensorflow-tts-preprocess --rootdir ./ljspeech --outdir ./dump_ljspeech --config preprocess/ljspeech_preprocess.yaml --dataset ljspeech
@@ -20,13 +21,12 @@
 #                          path the README's training command reads. ./dump_ljspeech/ is a real
 #                          directory, so this project's .gitignore entry `dump_ljspeech/` covers it
 #                          (a link in its place would not be ignored).
-#   tacotron2-config.yml   examples/tacotron2/conf/tacotron2.v1.yaml with its training-time writes
-#                          switched off: no checkpoint and no TensorBoard training log (both
-#                          intervals past any run's length). Evaluation and its intermediate
-#                          results are left as they are, since evaluation also predicts.
-#   ./dump_ljspeech/tacotron2-config.yml in this checkout: a link to it, so the training command can
-#                          name it by a relative path (a runner passes `~` through unexpanded, and
-#                          the script opens --config as given).
+#   tacotron2-config.yml   examples/tacotron2/conf/tacotron2.v1.yaml bounded to 300 steps, evaluating
+#                          every 100, with its training-time writes switched off (below).
+#   parallel-wavegan-config.yml  examples/parallel_wavegan/conf/parallel_wavegan.v1.yaml, the same.
+#   ./dump_ljspeech/<config> in this checkout: a link to each, so the training command can name it
+#                          by a relative path (a runner passes `~` through unexpanded, and the
+#                          script opens --config as given).
 # Idempotent: an extracted archive and a completed dump are kept and not redone. The dump is not
 # byte-reproducible (preprocess fits its scalers in the order a process pool returns results), which
 # is one more reason it is generated once and kept.
@@ -71,27 +71,36 @@ for split in train valid; do
 	ln -sfn "$dump/$split" "dump_ljspeech/$split"
 done
 
-# Regenerated every time from the checked-out config, so it never goes stale against it. A textual
-# substitution, not a YAML round trip, so the rest of the file stays byte for byte.
-config="$LJSPEECH_DIR/tacotron2-config.yml"
-sed -e "s|^train_max_steps: 200000 |train_max_steps: 300 |" \
-	-e "s|^eval_interval_steps: 500 |eval_interval_steps: 100 |" \
-	-e "s|^save_interval_steps: 2000 |save_interval_steps: 1000000000 |" \
-	-e "s|^log_interval_steps: 200 |log_interval_steps: 1000000000 |" \
-	examples/tacotron2/conf/tacotron2.v1.yaml > "$config.partial"
-if ! grep -q '^train_max_steps: 300 ' "$config.partial" ||
-	! grep -q '^eval_interval_steps: 100 ' "$config.partial"; then
-	echo "setup.sh: examples/tacotron2/conf/tacotron2.v1.yaml's train_max_steps or eval_interval_steps did not take the harness's bound." >&2
-	exit 1
-fi
-if ! grep -q '^save_interval_steps: 1000000000 ' "$config.partial" ||
-	! grep -q '^log_interval_steps: 1000000000 ' "$config.partial"; then
-	echo "setup.sh: examples/tacotron2/conf/tacotron2.v1.yaml has a training-time write this script does not switch off." >&2
-	exit 1
-fi
-mv "$config.partial" "$config"
-if [[ -e dump_ljspeech/tacotron2-config.yml && ! -L dump_ljspeech/tacotron2-config.yml ]]; then
-	echo "setup.sh: ./dump_ljspeech/tacotron2-config.yml is not a link to $config. Move it aside, then re-run." >&2
-	exit 1
-fi
-ln -sfn "$config" dump_ljspeech/tacotron2-config.yml
+# Each config a corpus entry names, regenerated every time from the checked-out one, so it never goes
+# stale against it. A textual substitution, not a YAML round trip, so the rest of the file stays byte
+# for byte. The training-time writes are switched off: no checkpoint and no TensorBoard training log
+# (both intervals past any run's length). Evaluation and its intermediate results are left as they
+# are, since evaluation also predicts.
+#   bounded_config <name> <source config> <train_max_steps> <eval_interval_steps>
+bounded_config() {
+	local name=$1 src=$2 steps=$3 eval=$4 config="$LJSPEECH_DIR/$1"
+	sed -e "s|^train_max_steps: \([0-9]*\) |train_max_steps: $steps |" \
+		-e "s|^eval_interval_steps: \([0-9]*\) |eval_interval_steps: $eval |" \
+		-e "s|^save_interval_steps: \([0-9]*\) |save_interval_steps: 1000000000 |" \
+		-e "s|^log_interval_steps: \([0-9]*\) |log_interval_steps: 1000000000 |" \
+		"$src" > "$config.partial"
+	if ! grep -q "^train_max_steps: $steps " "$config.partial" ||
+		! grep -q "^eval_interval_steps: $eval " "$config.partial"; then
+		echo "setup.sh: $src's train_max_steps or eval_interval_steps did not take the harness's bound." >&2
+		exit 1
+	fi
+	if ! grep -q '^save_interval_steps: 1000000000 ' "$config.partial" ||
+		! grep -q '^log_interval_steps: 1000000000 ' "$config.partial"; then
+		echo "setup.sh: $src has a training-time write this script does not switch off." >&2
+		exit 1
+	fi
+	mv "$config.partial" "$config"
+	if [[ -e dump_ljspeech/$name && ! -L dump_ljspeech/$name ]]; then
+		echo "setup.sh: ./dump_ljspeech/$name is not a link to $config. Move it aside, then re-run." >&2
+		exit 1
+	fi
+	ln -sfn "$config" "dump_ljspeech/$name"
+}
+
+bounded_config tacotron2-config.yml examples/tacotron2/conf/tacotron2.v1.yaml 300 100
+bounded_config parallel-wavegan-config.yml examples/parallel_wavegan/conf/parallel_wavegan.v1.yaml 300 100

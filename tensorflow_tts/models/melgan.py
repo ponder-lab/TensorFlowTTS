@@ -45,6 +45,7 @@ class TFReflectionPad1d(tf.keras.layers.Layer):
         self.padding_size = padding_size
         self.padding_type = padding_type
 
+    @tf.function
     def call(self, x):
         """Calculate forward propagation.
         Args:

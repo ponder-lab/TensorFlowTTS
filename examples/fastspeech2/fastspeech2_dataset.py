@@ -130,6 +130,7 @@ class CharactorDurationF0EnergyMelDataset(AbstractDataset):
         x[zero_idxs] = 0.0
         return x
 
+    @tf.function
     def _norm_mean_std_tf(self, x, mean, std):
         x = tf.numpy_function(self._norm_mean_std, [x, mean, std], tf.float32)
         return x

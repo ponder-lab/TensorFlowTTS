@@ -41,6 +41,7 @@ class TFMelSpectrogram(tf.keras.layers.Layer):
             n_mels, fft_length // 2 + 1, sample_rate, f_min, f_max
         )
 
+    @tf.function
     def _calculate_log_mels_spectrogram(self, signals):
         """Calculate forward propagation.
         Args:
@@ -66,6 +67,7 @@ class TFMelSpectrogram(tf.keras.layers.Layer):
         log_mel_spectrograms = tf.math.log(mel_spectrograms + 1e-6)  # prevent nan.
         return log_mel_spectrograms
 
+    @tf.function
     def call(self, y, x):
         """Calculate forward propagation.
         Args:
